@@ -24,15 +24,15 @@ public class UserEntity implements Serializable{
 	@Column(nullable=false,length=50)
 	private String lastName;
 	
-	@Column(nullable=false,length=100)
+	@Column(nullable=false,length=120, unique=true)
 	private String email;
 	
 	@Column(nullable=false)
 	private String encryptedPassword;
 	private String emailVerificationToken;
 	
-	@Column(nullable=false)
-	private boolean emailVerificationStatus=false;
+	@Column(nullable=true, columnDefinition="definition default false")
+	private boolean emailVerificationStatus;
 
 	public long getId() {
 		return id;
