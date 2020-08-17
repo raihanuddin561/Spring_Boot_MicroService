@@ -23,7 +23,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 		// TODO Auto-generated method stub
 		http.csrf().disable().authorizeRequests()
 		.antMatchers(HttpMethod.POST,SecurityConstants.SINGUP_URL).permitAll()
-		.anyRequest().authenticated();
+		.anyRequest().authenticated().and().addFilter(new AuthenticationFilter(authenticationManager()));
 	}
 	
 	@Override
