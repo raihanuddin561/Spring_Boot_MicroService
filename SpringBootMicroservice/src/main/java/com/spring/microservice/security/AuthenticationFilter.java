@@ -20,24 +20,30 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spring.microservice.SpringApplicationContext;
 import com.spring.microservice.model.request.UserLoginRequestModel;
+import com.spring.microservice.service.UserService;
+import com.spring.microservice.shared.dto.UserDto;
 
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
-public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter{
+public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	final private AuthenticationManager authenticationManager;
+
 	public AuthenticationFilter(AuthenticationManager authenticationManager) {
 		this.authenticationManager = authenticationManager;
 	}
-	
+
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException {
 		try {
-			UserLoginRequestModel creds = new ObjectMapper().readValue(request.getInputStream(),UserLoginRequestModel.class);
-			return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(creds.getEmail(),creds.getPassword(),new ArrayList<>()));
+			UserLoginRequestModel creds = new ObjectMapper().readValue(request.getInputStream(),
+					UserLoginRequestModel.class);
+			return authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(creds.getEmail(), creds.getPassword(), new ArrayList<>()));
 		} catch (JsonParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -48,21 +54,21 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return super.attemptAuthentication(request, response);
 	}
-	
+
 	@Override
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
 			Authentication authResult) throws IOException, ServletException {
 		String username = ((User) authResult.getPrincipal()).getUsername();
-		String token = Jwts.builder()
-				.setSubject(username)
-				.setExpiration(new Date(System.currentTimeMillis()+SecurityConstants.EXPIRATION_TIME))
-				.signWith(SignatureAlgorithm.HS512, SecurityConstants.TOKEN_SECRET)
-				.compact();
-				
-		response.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX+token);
+		String token = Jwts.builder().setSubject(username)
+				.setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+				.signWith(SignatureAlgorithm.HS512, SecurityConstants.TOKEN_SECRET).compact();
+		UserService userService = (UserService) SpringApplicationContext.getBean("userServiceImpl");
+		UserDto userDto = userService.getUser(username);
+		response.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + token);
+		response.addHeader("userId", userDto.getUserId());
 	}
 
 }
