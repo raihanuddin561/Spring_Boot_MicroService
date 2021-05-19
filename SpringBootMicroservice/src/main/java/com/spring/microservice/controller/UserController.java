@@ -21,7 +21,7 @@ import com.spring.microservice.shared.dto.UserDto;
 public class UserController {
 	@Autowired
 	private UserService userService;
-	@GetMapping(path="/{id}",produces= {MediaType.APPLICATION_XML_VALUE,MediaType.APPLICATION_JSON_VALUE})
+	@GetMapping(path="/{id}",produces= {MediaType.APPLICATION_JSON_VALUE})
 	public UserRest getUser(@PathVariable String id) {
 		UserRest returnValue= new UserRest();
 		UserDto dto = userService.getUserById(id);
